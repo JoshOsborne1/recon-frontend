@@ -1,221 +1,196 @@
-import { motion } from 'framer-motion'
-import { ArrowRight, Check, Zap } from 'lucide-react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { ArrowRight, Cpu, Activity, Database, Radar } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-
-interface FeedEntry {
-  id: string
-  title: string
-  summary: string
-  impact: 'HIGH' | 'MEDIUM' | 'LOW'
-  category: string
-  affects: string[]
-  date: string
-}
-
-const FALLBACK_PREVIEW: FeedEntry[] = [
-  {
-    id: '1',
-    title: 'GPT-4.5 Turbo Weights Leaked',
-    summary: 'Model weights for an unreleased openai model appeared briefly on HuggingFace before being removed.',
-    impact: 'HIGH',
-    category: 'Model Releases',
-    affects: ['openai-api', 'research'],
-    date: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: 'Anthropic Introduces Prompt Caching',
-    summary: 'New API feature allows caching of context window segments, reducing costs by up to 90% for repeated prompts.',
-    impact: 'MEDIUM',
-    category: 'API Changes',
-    affects: ['anthropic-api', 'cost-optimization'],
-    date: new Date(Date.now() - 3600000).toISOString()
-  }
-]
+import { useState, useEffect, useRef } from 'react'
 
 export function Home() {
-  const [previewData, setPreviewData] = useState<FeedEntry[]>([])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: containerRef })
+  const y = useTransform(scrollYProgress, [0, 1], [0, 200])
 
+  // Matrix text effect
+  const [matrixText, setMatrixText] = useState('INITIALIZING_RECON_CORE...')
   useEffect(() => {
-    const fetchPreview = async () => {
-      try {
-        const url = import.meta.env.VITE_API_URL || 'http://localhost:4200'
-        const response = await fetch(`${url}/api/latest?limit=2`)
-        if (!response.ok) throw new Error('API Error')
-        const data = await response.json()
-        setPreviewData(data.slice(0, 2))
-      } catch (err) {
-        setPreviewData(FALLBACK_PREVIEW)
-      }
-    }
-    fetchPreview()
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*>'
+    let iteration = 0
+    const finalStr = 'SECURE_INTEL_UPLINK_ESTABLISHED'
+    
+    const interval = setInterval(() => {
+      setMatrixText(prev => {
+        const next = prev.split('').map((_, i) => {
+          if (i < iteration) return finalStr[i] || ''
+          return chars[Math.floor(Math.random() * chars.length)]
+        }).join('')
+        
+        if (iteration >= finalStr.length) clearInterval(interval)
+        iteration += 1/3
+        return next
+      })
+    }, 30)
+    
+    return () => clearInterval(interval)
   }, [])
 
   return (
-    <div className="relative overflow-hidden bg-[#09090b]">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+    <div ref={containerRef} className="relative min-h-screen bg-[#050505] overflow-hidden">
       
-      {/* Hero Section */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0ff_1px,transparent_1px),linear-gradient(to_bottom,#0ff_1px,transparent_1px)] bg-[size:64px_64px] opacity-[0.02]" />
+        
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-4xl mx-auto"
+          style={{ y }}
+          className="absolute inset-0 opacity-30"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-8">
-            <span className="flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-mono font-medium text-emerald-400 uppercase tracking-wider">System Operational - 24/7 Intel</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6">
-            AI intelligence feed <br />
-            <span className="text-zinc-500">for builders.</span>
-          </h1>
-          
-          <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Stop polling Twitter and reading changelogs. Recon monitors the AI ecosystem, structures the updates, and pipes them directly into your agent's context.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link 
-              to="/pricing"
-              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-black bg-white rounded hover:bg-zinc-200 transition-colors"
-            >
-              Get API Key
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-            <Link 
-              to="/feed"
-              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 text-sm font-medium text-white bg-[#18181b] border border-white/10 rounded hover:bg-[#27272a] transition-colors"
-            >
-              View Live Feed
-            </Link>
-          </div>
+          <div className="absolute top-[20%] left-[10%] w-[40rem] h-[40rem] bg-cyan-900/20 rounded-full blur-[120px] mix-blend-screen" />
+          <div className="absolute top-[40%] right-[10%] w-[30rem] h-[30rem] bg-fuchsia-900/10 rounded-full blur-[100px] mix-blend-screen" />
         </motion.div>
       </div>
 
-      {/* Live Feed Preview */}
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
-        <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
-            <div className="flex items-center gap-3">
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <span className="text-sm font-mono text-zinc-300">GET /api/latest</span>
+      {/* Hero Section */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32 min-h-[90vh] flex flex-col justify-center">
+        
+        <div className="grid lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Copy & CTA */}
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="lg:col-span-7 space-y-8"
+          >
+            {/* System Status Banner */}
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#0ff]/5 border border-[#0ff]/20 rounded-sm">
+              <Radar className="w-4 h-4 text-[#0ff] animate-[spin_3s_linear_infinite]" />
+              <span className="text-xs font-mono text-[#0ff] tracking-widest uppercase">{matrixText}</span>
             </div>
-            <span className="text-xs font-mono text-zinc-500">Sub-50ms latency</span>
-          </div>
-          <div className="p-6 space-y-4">
-            {previewData.map((entry, i) => (
-              <motion.div 
-                key={entry.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-4 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors"
+
+            <div className="space-y-4">
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-[0.9]">
+                <span className="block opacity-90">GLOBAL</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-600">AI INTEL</span>
+                <span className="block text-[#0ff] glitch-hover cursor-default">SYNDICATE.</span>
+              </h1>
+              
+              <div className="h-px w-full max-w-md bg-gradient-to-r from-[#0ff]/50 to-transparent my-6" />
+              
+              <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl font-mono leading-relaxed">
+                Raw, unstructured AI ecosystem chaos converted into high-signal telemetry. 
+                Piped directly into your agent's nervous system via single API endpoint.
+                Zero noise. Total awareness.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start gap-6 pt-4">
+              <Link 
+                to="/feed"
+                className="group relative px-8 py-4 bg-[#0ff] text-black font-mono font-bold text-sm uppercase tracking-widest overflow-hidden"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase tracking-wider ${
-                    entry.impact === 'HIGH' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                    entry.impact === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                    'bg-slate-500/10 text-slate-400 border-slate-500/20'
-                  }`}>
-                    {entry.impact} IMPACT
-                  </span>
-                  <span className="text-[10px] font-mono text-teal-400 bg-teal-400/10 px-2 py-0.5 rounded border border-teal-400/20 uppercase tracking-wider">
-                    {entry.category}
-                  </span>
+                <div className="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <span className="relative flex items-center gap-2">
+                  ACCESS_TERMINAL
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+                {/* Cyberpunk corner cuts */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-black"></div>
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-black"></div>
+              </Link>
+              
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+                  <Database className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>DATA_INGEST: ACTIVE</span>
                 </div>
-                <h3 className="text-lg font-semibold text-zinc-100 mb-2">{entry.title}</h3>
-                <p className="text-sm text-zinc-400 mb-3">{entry.summary}</p>
-                <div className="flex flex-wrap gap-2">
-                  {entry.affects.map(target => (
-                    <span key={target} className="text-[10px] font-mono text-zinc-500 bg-black px-2 py-1 rounded border border-white/5">
-                      {target}
-                    </span>
+                <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>SYS_LATENCY: 42MS</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Visual Data Display */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="lg:col-span-5 relative"
+          >
+            {/* Holographic display frame */}
+            <div className="relative aspect-square max-w-md mx-auto w-full">
+              {/* Outer rotating ring */}
+              <div className="absolute inset-0 border border-white/5 rounded-full animate-[spin_60s_linear_infinite]"></div>
+              <div className="absolute inset-4 border border-[#0ff]/10 rounded-full border-dashed animate-[spin_40s_linear_infinite_reverse]"></div>
+              
+              {/* Core Display */}
+              <div className="absolute inset-8 bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 flex flex-col items-center justify-center overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#0ff]/50 to-transparent"></div>
+                
+                <Cpu className="w-16 h-16 text-[#0ff]/80 mb-6" />
+                
+                <div className="text-center font-mono space-y-2">
+                  <div className="text-xs text-zinc-500 uppercase tracking-widest">Global Threat Level</div>
+                  <div className="text-4xl font-bold text-white tracking-tighter">DEFCON_4</div>
+                  <div className="text-xs text-[#0ff] mt-4 flex items-center justify-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-[#0ff] rounded-full animate-ping"></span>
+                    MONITORING_124_VECTORS
+                  </div>
+                </div>
+
+                {/* Animated data lines */}
+                <div className="absolute bottom-0 w-full h-32 flex items-end justify-around px-4 opacity-20">
+                  {[...Array(12)].map((_, i) => (
+                    <motion.div 
+                      key={i}
+                      className="w-1 bg-[#0ff]"
+                      animate={{ height: ['10%', '100%', '30%'] }}
+                      transition={{ 
+                        duration: 1.5 + Math.random(), 
+                        repeat: Infinity,
+                        repeatType: "mirror"
+                      }}
+                    />
                   ))}
                 </div>
-              </motion.div>
+              </div>
+              
+              {/* Corner brackets */}
+              <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-[#0ff]/50"></div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[#0ff]/50"></div>
+              <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[#0ff]/50"></div>
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-[#0ff]/50"></div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Tech Specs Marquee */}
+      <div className="relative z-10 border-y border-white/5 bg-[#0a0a0a] overflow-hidden py-4">
+        <div className="flex gap-8 whitespace-nowrap opacity-50 font-mono text-xs uppercase tracking-widest text-zinc-400">
+          <motion.div 
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+            className="flex gap-16"
+          >
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="flex gap-16 items-center">
+                <span>[ PROTOCOL: HTTPS/WSS ]</span>
+                <span className="w-1 h-1 bg-white rounded-full"></span>
+                <span>[ LATENCY: &lt;50MS ]</span>
+                <span className="w-1 h-1 bg-white rounded-full"></span>
+                <span>[ UPTIME: 99.99% ]</span>
+                <span className="w-1 h-1 bg-white rounded-full"></span>
+                <span>[ FORMAT: JSON_STRICT ]</span>
+                <span className="w-1 h-1 bg-white rounded-full"></span>
+                <span>[ AUTH: BEARER_TOKEN ]</span>
+                <span className="w-1 h-1 bg-white rounded-full"></span>
+              </div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Pricing */}
-      <div className="relative border-t border-white/5 bg-[#09090b] pt-24 pb-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">Tactical Pricing</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">
-              Simple tiers for developers and autonomous systems.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Hobby Tier */}
-            <div className="p-8 rounded-2xl border border-white/10 bg-[#18181b] relative">
-              <h3 className="text-xl font-semibold text-white mb-2">Developer</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-white">$0</span>
-                <span className="text-zinc-500">/mo</span>
-              </div>
-              <p className="text-zinc-400 mb-8 text-sm">Perfect for testing and personal side projects.</p>
-              
-              <ul className="space-y-4 mb-8">
-                {[
-                  '100 API requests / day',
-                  'Standard latency',
-                  'Community support',
-                  'Web feed access'
-                ].map(feature => (
-                  <li key={feature} className="flex items-center gap-3 text-sm text-zinc-300">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <button className="w-full py-3 text-sm font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded transition-colors">
-                Start Free
-              </button>
-            </div>
-
-            {/* Pro Tier */}
-            <div className="p-8 rounded-2xl border border-sky-500/30 bg-[#18181b] relative overflow-hidden">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-sky-500/10 border-b border-l border-sky-500/20 rounded-bl-lg">
-                <span className="text-xs font-mono text-sky-400 uppercase tracking-wider">Production</span>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Agent Fleet</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-white">$49</span>
-                <span className="text-zinc-500">/mo</span>
-              </div>
-              <p className="text-zinc-400 mb-8 text-sm">For autonomous systems operating at scale.</p>
-              
-              <ul className="space-y-4 mb-8">
-                {[
-                  'Unlimited API requests',
-                  'Priority low-latency routing',
-                  'Webhooks & WebSocket access',
-                  'Enterprise support'
-                ].map(feature => (
-                  <li key={feature} className="flex items-center gap-3 text-sm text-zinc-300">
-                    <Check className="w-4 h-4 text-sky-400 shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <button className="w-full py-3 text-sm font-semibold text-black bg-white hover:bg-zinc-200 rounded transition-colors">
-                Deploy Now
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

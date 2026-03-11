@@ -3,7 +3,11 @@
 @theme {
   --color-brand: #0ea5e9;
   --color-brand-green: #10b981;
-  --color-background: #09090b;
+  --color-background: #050505;
+  --color-surface: #0a0a0a;
+  
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
 }
 
 :root {
@@ -13,8 +17,76 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+/* Scanline effect */
+.scanlines {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.2)
+  );
+  background-size: 100% 4px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.15;
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 1px) }
+  40% { transform: translate(-1px, -1px) }
+  60% { transform: translate(2px, 1px) }
+  80% { transform: translate(1px, -1px) }
+  100% { transform: translate(0) }
+}
+
+.glitch-hover:hover {
+  animation: glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+  color: #fff;
+  text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+}
+
+/* CRT noise */
+.crt-noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 49;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Glowing selection */
+::selection {
+  background: rgba(0, 255, 255, 0.2);
+  color: #fff;
 }
