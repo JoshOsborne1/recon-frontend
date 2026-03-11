@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Copy, ChevronRight, BookOpen, Key, Terminal } from 'lucide-react'
+import { Check, Copy, Key, Terminal, Database } from 'lucide-react'
 
 const endpoints = [
   {

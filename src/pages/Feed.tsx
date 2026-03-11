@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Search, AlertTriangle, RefreshCw, Filter, ExternalLink, Activity } from 'lucide-react'
 
 type ImpactLevel = 'HIGH' | 'MEDIUM' | 'LOW'
@@ -225,7 +225,7 @@ export function Feed() {
 
         {/* Feed List */}
         <div className="space-y-12">
-          {Object.entries(groupedEntries).map(([date, dayEntries], groupIdx) => (
+          {Object.entries(groupedEntries).map(([date, dayEntries]) => (
             <div key={date} className="relative">
               {/* Date Header */}
               <div className="sticky top-16 z-10 py-2 bg-[#09090b]/90 backdrop-blur-md mb-4 -mx-2 px-2 flex items-center gap-4">

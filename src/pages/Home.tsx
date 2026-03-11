@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Code, Database, Globe, Check, Zap, Shield } from 'lucide-react'
+import { ArrowRight, Check, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
